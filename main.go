@@ -60,7 +60,7 @@ func main() {
 	passPhrase := generatePassphrasewords(wordData, *numWords)
 
 	// customize print function
-	passPrint := color.New(color.Bold, color.FgMagenta, color.BgGreen).SprintFunc()
+	passPrint := color.New(color.Bold, color.FgMagenta).SprintFunc()
 	fmt.Printf("Your new password: %s\n", passPrint(passPhrase))
 
 	// copy to clipboard if desired
