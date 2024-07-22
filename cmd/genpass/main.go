@@ -14,9 +14,9 @@ func main() {
 	gp.PrintLogo()
 
 	// Define command-line flags
-	wordlist := flag.String("wordlist", "", "Path to the wordlist file")
-	numWords := flag.Int("num", 4, "Number of words in the passphrase")
-	process := flag.Bool("process", false, "Process new wordlist for use with GenPass")
+	wordlist := flag.String("w", "", "Path to the wordlist file")
+	numWords := flag.Int("n", 4, "Number of words in the passphrase")
+	process := flag.Bool("p", false, "Process new wordlist for use with GenPass")
 	copyToClip := flag.Bool("c", false, "Copy new password to clipboard")
 	flag.Parse()
 
