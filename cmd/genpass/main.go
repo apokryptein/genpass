@@ -37,10 +37,8 @@ func main() {
 		return
 	}
 
-	// check if ~/.config/genpass & ~/config/genpass/genpass.lst are present
-	good := gp.CheckConfig(*wordlist, homeDir, isDefault)
-
-	if good {
+	// check if ~/.config/genpass & ~/config/genpass/genpass.lst exist in home directory
+	if good := gp.CheckConfig(*wordlist, homeDir, isDefault); good {
 		fmt.Printf("%s Looks like your config is good to go.\n\n", yellow("[i]"))
 	}
 
@@ -61,6 +59,7 @@ func main() {
 	}
 }
 
+// function to verify if flag is set
 func isFlagPassed(name string) bool {
 	found := false
 	flag.Visit(func(f *flag.Flag) {
