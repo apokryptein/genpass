@@ -2,11 +2,10 @@ module github.com/apokryptein/genpass
 
 go 1.22.3
 
-require golang.org/x/text v0.16.0
-
 require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/fatih/color v1.17.0
+	golang.org/x/text v0.16.0
 )
 
 require (

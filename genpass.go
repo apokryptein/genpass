@@ -1,8 +1,7 @@
-package main
+package genpass
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -18,59 +17,7 @@ import (
 	"golang.org/x/text/language"
 )
 
-func main() {
-	// Print the logo
-	printLogo()
-
-	// Define command-line flags
-	wordlist := flag.String("wordlist", "", "Path to the wordlist file")
-	numWords := flag.Int("num", 4, "Number of words in the passphrase")
-	process := flag.Bool("process", false, "Process new wordlist for use with GenPass")
-	copyToClip := flag.Bool("c", false, "Copy new password to clipboard")
-	flag.Parse()
-
-	// get user's home directory
-	homeDir, _ := os.UserHomeDir()
-	isDefault := false
-
-	// set notice print color
-	yellow := color.New(color.FgYellow).SprintFunc()
-
-	// Check if wordlist path is provided
-	if !(isFlagPassed(*wordlist)) {
-		fmt.Printf("%s Using default wordlist\n", yellow("[i]"))
-		*wordlist = homeDir + "/.config/genpass/genpass.lst"
-		isDefault = true
-	} else if *process && !(isFlagPassed(*wordlist)) {
-		fmt.Println("Please provide a path to the wordlist you would like to process using the -wordlist flag.")
-		return
-	}
-
-	// check if ~/.config/genpass & ~/config/genpass/genpass.lst are present
-	good := CheckConfig(*wordlist, homeDir, isDefault)
-
-	if good {
-		fmt.Printf("%s Looks like your config is good to go.\n\n", yellow("[i]"))
-	}
-
-	// parse wordlist into map[int][]string data structure
-	wordData, _ := readWords(*wordlist)
-
-	// get passphrase
-	passPhrase := generatePassphrasewords(wordData, *numWords)
-
-	// customize print function
-	passPrint := color.New(color.Bold, color.FgMagenta).SprintFunc()
-	fmt.Printf("Your new password: %s\n", passPrint(passPhrase))
-
-	// copy to clipboard if desired
-	if *copyToClip {
-		CopyToClipboard(passPhrase)
-		color.Red("Your new password has been copied to the clipboard.")
-	}
-}
-
-func printLogo() {
+func PrintLogo() {
 	logo := `
 	  __             __                
 	 /              /  |               
@@ -81,10 +28,10 @@ func printLogo() {
 
 	notice := color.New(color.Bold, color.FgGreen).PrintlnFunc()
 	notice(logo)
-	//ProcessNewPassFile("test.txt")
+	// ProcessNewPassFile("test.txt")
 }
 
-func generatePassphrasewords(wordData map[int][]string, numWords int) string {
+func GeneratePassphrasewords(wordData map[int][]string, numWords int) string {
 	// additional characters to append (for now)
 	specials := [6]string{"@", "&", "$", "!", "#", "?"}
 	nums := [10]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
@@ -126,7 +73,7 @@ func generatePassphrasewords(wordData map[int][]string, numWords int) string {
 	return strings.Join(passphraseWords, "")
 }
 
-func readWords(filepath string) (map[int][]string, error) {
+func ReadWords(filepath string) (map[int][]string, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
@@ -161,7 +108,6 @@ func readWords(filepath string) (map[int][]string, error) {
 			// val does not yet exist, make it
 			data[wordLen] = []string{vals[1]}
 		}
-
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -171,6 +117,7 @@ func readWords(filepath string) (map[int][]string, error) {
 	return data, nil
 }
 
+// TODO: add parameter to take desired filename for output
 func ProcessNewPassFile(wordfile string) {
 	// Open provided file for parsing
 	file, err := os.Open(wordfile)
@@ -195,7 +142,6 @@ func ProcessNewPassFile(wordfile string) {
 		char_count := utf8.RuneCountInString(scanner.Text())
 		fmt.Fprintln(out_file, (strconv.Itoa(char_count) + " " + strings.ToLower(scanner.Text())))
 	}
-
 }
 
 func DoesDirExist(path string) (bool, error) {
@@ -223,15 +169,14 @@ func CheckConfig(wordfile string, homeDir string, isDefault bool) bool {
 	val, _ := DoesDirExist(homeDir + "/.config/genpass")
 
 	if val {
-		//fmt.Println("[i] ~/.config/genpass Directory Exists")
+		// fmt.Println("[i] ~/.config/genpass Directory Exists")
 		if DoesFileExist(homeDir + "/.config/genpass/genpass.lst") {
-			//fmt.Println("[i] genpass.lst Exists")
+			// fmt.Println("[i] genpass.lst Exists")
 			return true
 		} else {
-			//fmt.Println("[i] ~.config/genpass/genpass.lst Does Not Exist")
+			// fmt.Println("[i] ~.config/genpass/genpass.lst Does Not Exist")
 			CreateConfig(wordfile, homeDir, isDefault)
 		}
-
 	} else {
 		yellow := color.New(color.FgYellow).SprintFunc()
 		cyan := color.New(color.FgCyan).SprintFunc()
@@ -249,16 +194,18 @@ func CreateConfig(wordfile string, homeDir string, isDefault bool) {
 	fmt.Printf("%s Wordlist config not present. Creating it for you here: %s\n\n", yellow("[i]"), cyan(homeDir+"/.config/genpass/genpass.lst"))
 
 	if isDefault {
-		copyFile("genpass.lst", (homeDir + "/.config/genpass/genpass.lst"))
+		// TODO: clean up -> where to store default list, retrieval, etc
+		copyFile("../../configs/genpass.lst", (homeDir + "/.config/genpass/genpass.lst"))
 	} else {
 		copyFile(wordfile, (homeDir + "/.config/genpass/genpass.lst"))
 	}
-
 }
 
-func checkErr(err error) {
+func CopyToClipboard(data string) {
+	err := clipboard.WriteAll(data)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error copying to clipboard:", err)
+		os.Exit(1)
 	}
 }
 
@@ -271,20 +218,8 @@ func copyFile(src string, dst string) {
 	checkErr(err)
 }
 
-func CopyToClipboard(data string) {
-	err := clipboard.WriteAll(data)
+func checkErr(err error) {
 	if err != nil {
-		fmt.Println("Error copying to clipboard:", err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
-}
-
-func isFlagPassed(name string) bool {
-	found := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == name {
-			found = true
-		}
-	})
-	return found
 }
