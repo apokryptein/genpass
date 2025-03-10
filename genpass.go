@@ -19,11 +19,10 @@ import (
 
 func PrintLogo() {
 	logo := `
-	  __             __                
-	 /              /  |               
-	( __  ___  ___ (___| ___  ___  ___ 
-	|   )|___)|   )|    |   )|___ |___ 
-	|__/ |__  |  / |    |__/| __/  __/
+  ▄▖
+  ▌ █▌▛▌▛▌▀▌▛▘▛▘
+  ▙▌▙▖▌▌▙▌█▌▄▌▄▌
+        ▌
 	`
 
 	notice := color.New(color.Bold, color.FgGreen).PrintlnFunc()
